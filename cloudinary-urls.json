@@ -1,0 +1,128 @@
+[
+  {
+    "file": "20230510_142333.jpg",
+    "public_id": "20230510_142333",
+    "resource_type": "image",
+    "url": "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754484263/20230510_142333.jpg"
+  },
+  {
+    "file": "20240919_094450.jpg",
+    "public_id": "20240919_094450",
+    "resource_type": "image",
+    "url": "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754484289/20240919_094450.jpg"
+  },
+  {
+    "file": "20241012_160913.jpg",
+    "public_id": "20241012_160913",
+    "resource_type": "image",
+    "url": "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754484320/20241012_160913.jpg"
+  },
+  {
+    "file": "20241024_124043.jpg",
+    "public_id": "20241024_124043",
+    "resource_type": "image",
+    "url": "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754484351/20241024_124043.jpg"
+  },
+  {
+    "file": "20241108_131510.mp4",
+    "public_id": "20241108_131510",
+    "resource_type": "video",
+    "url": "https://res.cloudinary.com/dlstdyi8d/video/upload/v1754484780/20241108_131510.mp4"
+  },
+  {
+    "file": "20241119_120754.jpg",
+    "public_id": "20241119_120754",
+    "resource_type": "image",
+    "url": "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754484803/20241119_120754.jpg"
+  },
+  {
+    "file": "20241215_124400.jpg",
+    "public_id": "20241215_124400",
+    "resource_type": "image",
+    "url": "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754484827/20241215_124400.jpg"
+  },
+  {
+    "file": "20241215_124415.jpg",
+    "public_id": "20241215_124415",
+    "resource_type": "image",
+    "url": "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754484850/20241215_124415.jpg"
+  },
+  {
+    "file": "20250115_102753.jpg",
+    "public_id": "20250115_102753",
+    "resource_type": "image",
+    "url": "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754484875/20250115_102753.jpg"
+  },
+  {
+    "file": "20250130_154217.jpg",
+    "public_id": "20250130_154217",
+    "resource_type": "image",
+    "url": "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754484896/20250130_154217.jpg"
+  },
+  {
+    "file": "20250204_163151.jpg",
+    "public_id": "20250204_163151",
+    "resource_type": "image",
+    "url": "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754484914/20250204_163151.jpg"
+  },
+  {
+    "file": "20250204_170618.jpg",
+    "public_id": "20250204_170618",
+    "resource_type": "image",
+    "url": "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754484940/20250204_170618.jpg"
+  },
+  {
+    "file": "20250226_131619.jpg",
+    "public_id": "20250226_131619",
+    "resource_type": "image",
+    "url": "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754484964/20250226_131619.jpg"
+  },
+  {
+    "file": "20250227_115112.mp4",
+    "public_id": "mansa_photos/20250227_115112",
+    "resource_type": "video",
+    "url": "https://res.cloudinary.com/dlstdyi8d/video/upload/v1754485619/mansa_photos/20250227_115112.mp4"
+  },
+  {
+    "file": "20250314_123518.jpg",
+    "public_id": "mansa_photos/20250314_123518",
+    "resource_type": "image",
+    "url": "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754485644/mansa_photos/20250314_123518.jpg"
+  },
+  {
+    "file": "20250319_105948.jpg",
+    "public_id": "mansa_photos/20250319_105948",
+    "resource_type": "image",
+    "url": "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754485667/mansa_photos/20250319_105948.jpg"
+  },
+  {
+    "file": "20250319_173717.jpg",
+    "public_id": "mansa_photos/20250319_173717",
+    "resource_type": "image",
+    "url": "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754485689/mansa_photos/20250319_173717.jpg"
+  },
+  {
+    "file": "20250703_124047.jpg",
+    "public_id": "mansa_photos/20250703_124047",
+    "resource_type": "image",
+    "url": "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754485712/mansa_photos/20250703_124047.jpg"
+  },
+  {
+    "file": "20250727_161354.jpg",
+    "public_id": "mansa_photos/20250727_161354",
+    "resource_type": "image",
+    "url": "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754485733/mansa_photos/20250727_161354.jpg"
+  },
+  {
+    "file": "logo final.jpg",
+    "public_id": "mansa_photos/logo_final",
+    "resource_type": "image",
+    "url": "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754485740/mansa_photos/logo_final.jpg"
+  },
+  {
+    "file": "logo.png",
+    "public_id": "mansa_photos/logo",
+    "resource_type": "image",
+    "url": "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754485744/mansa_photos/logo.png"
+  }
+]
