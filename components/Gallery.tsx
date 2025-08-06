@@ -1,4 +1,3 @@
-// components/Gallery.tsx
 "use client";
 
 import Image from "next/image";
@@ -7,15 +6,31 @@ import { X, Play } from "lucide-react";
 
 type GalleryItem = {
   type: "image" | "video";
-  src: string;
+  src: string; // mp4 or image
   webm?: string;
   thumbnail: string;
   poster?: string;
   title: string;
 };
 
+const CLOUDINARY_TRANSFORM = (url: string, w = 400) => {
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("res.cloudinary.com")) {
+      const parts = u.pathname.split("/upload/");
+      if (parts.length === 2) {
+        return `${u.origin}${parts[0]}/upload/f_auto,q_auto,w_${w}/${parts[1]}`;
+      }
+    }
+  } catch {
+    // noop
+  }
+  return url;
+};
+
 export default function Gallery(): JSX.Element {
   const [selectedMedia, setSelectedMedia] = useState<GalleryItem | null>(null);
+  const [selectedVideoSrc, setSelectedVideoSrc] = useState<string | null>(null);
   const lastFocusedRef = useRef<HTMLElement | null>(null);
 
   const galleryItems: GalleryItem[] = [
@@ -67,11 +82,20 @@ export default function Gallery(): JSX.Element {
     lastFocusedRef.current =
       trigger ?? (document.activeElement as HTMLElement | null);
     setSelectedMedia(item);
+    // if it is a video, set selectedVideoSrc only when modal opens to avoid preloading
+    if (item.type === "video") {
+      setSelectedVideoSrc(null); // clear first
+      // small timeout gives modal render time
+      setTimeout(() => setSelectedVideoSrc(item.src), 50);
+    } else {
+      setSelectedVideoSrc(null);
+    }
     document.body.style.overflow = "hidden";
   };
 
   const closeMedia = () => {
     setSelectedMedia(null);
+    setSelectedVideoSrc(null);
     document.body.style.overflow = "";
     lastFocusedRef.current?.focus();
   };
@@ -115,11 +139,12 @@ export default function Gallery(): JSX.Element {
             >
               <div className="h-64 relative">
                 <Image
-                  src={item.thumbnail}
+                  src={CLOUDINARY_TRANSFORM(item.thumbnail, 600)}
                   alt={item.title}
                   fill
                   sizes="(max-width: 1024px) 50vw, 33vw"
                   style={{ objectFit: "cover" }}
+                  loading={index <= 2 ? "eager" : "lazy"}
                 />
               </div>
 
@@ -172,18 +197,26 @@ export default function Gallery(): JSX.Element {
                     />
                   </div>
                 ) : (
-                  <video
-                    controls
-                    preload="none"
-                    poster={selectedMedia.poster ?? selectedMedia.thumbnail}
-                    className="w-full h-auto max-h-[80vh] bg-black"
-                  >
-                    {selectedMedia.webm && (
-                      <source src={selectedMedia.webm} type="video/webm" />
-                    )}
-                    <source src={selectedMedia.src} type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
+                  <div className="w-full h-auto max-h-[80vh] bg-black">
+                    <video
+                      controls
+                      preload="none"
+                      poster={
+                        selectedMedia.poster ??
+                        CLOUDINARY_TRANSFORM(selectedMedia.thumbnail, 800)
+                      }
+                      className="w-full h-full max-h-[80vh] bg-black"
+                    >
+                      {/* set video src only after modal opens using selectedVideoSrc state */}
+                      {selectedMedia.webm && selectedVideoSrc && (
+                        <source src={selectedMedia.webm} type="video/webm" />
+                      )}
+                      {selectedVideoSrc && (
+                        <source src={selectedVideoSrc} type="video/mp4" />
+                      )}
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
                 )}
               </div>
 

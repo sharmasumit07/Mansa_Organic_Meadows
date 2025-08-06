@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { ChevronDown, MapPin, Phone, Mail, Clock, Leaf, Heart, Users, Award } from 'lucide-react';
 import Hero from '@/components/Hero';
 import About from '@/components/About';
-import Products from '@/components/Highlights';
+import Highlights from '@/components/Highlights';
 import Gallery from '@/components/Gallery';
 import Services from '@/components/Services';
 import Contact from '@/components/Contact';
@@ -17,7 +17,7 @@ export default function Home() {
       <Navigation />
       <Hero />
       <About />
-      <Products />
+      <Highlights />
       <Gallery />
       <Services />
       <Contact />

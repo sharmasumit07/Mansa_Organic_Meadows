@@ -1,38 +1,82 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 export default function Hero(): JSX.Element {
-  // Cloudinary base (your account)
   const CLOUD_BASE = "https://res.cloudinary.com/dlstdyi8d";
 
-  // Full image (high-res)
+  // High-res image (will be requested only when hero is visible)
   const full = `${CLOUD_BASE}/image/upload/f_auto,q_auto/v1754485689/mansa_photos/20250319_173717.jpg`;
 
-  // Thumbnail / preview generated on the fly by Cloudinary
-  // w_1000 (width) gives a reasonably-sized background preview; change to w_800 or w_600 to shrink further.
+  // Low-res preview (served immediately)
   const thumb = `${CLOUD_BASE}/image/upload/f_auto,q_auto,w_1000/mansa_photos/20250319_173717.jpg`;
 
   const [bgImage, setBgImage] = useState<string>(thumb);
   const [bgLoaded, setBgLoaded] = useState<boolean>(false);
 
-  useEffect(() => {
-    // Preload the high-res background and swap when ready
-    const img = new window.Image();
-    img.src = full;
-    img.onload = () => {
-      setBgImage(full);
-      setBgLoaded(true);
-    };
-    img.onerror = () => {
-      // If loading high-res fails, keep thumb and mark as loaded to remove blur
-      setBgLoaded(true);
-    };
+  // ref to hero element for intersection observer
+  const heroRef = useRef<HTMLElement | null>(null);
+  // track whether we've started loading the full image (so we don't trigger multiple times)
+  const startedRef = useRef(false);
 
-    // cleanup
+  useEffect(() => {
+    // If the user is on very slow JS environment or IntersectionObserver isn't available,
+    // fall back to preloading immediately. (But modern browsers support this.)
+    if (
+      typeof window === "undefined" ||
+      typeof IntersectionObserver === "undefined"
+    ) {
+      const img = new window.Image();
+      img.src = full;
+      img.onload = () => {
+        setBgImage(full);
+        setBgLoaded(true);
+      };
+      img.onerror = () => setBgLoaded(true);
+      return;
+    }
+
+    const el = heroRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting || entry.intersectionRatio > 0) {
+            if (!startedRef.current) {
+              startedRef.current = true;
+              // load full image
+              const img = new window.Image();
+              img.src = full;
+              img.onload = () => {
+                setBgImage(full);
+                setBgLoaded(true);
+              };
+              img.onerror = () => {
+                // if load fails, mark as loaded so blur is removed
+                setBgLoaded(true);
+              };
+            }
+            // We can stop observing after starting the load
+            obs.unobserve(entry.target);
+          }
+        }
+      },
+      {
+        // load a bit before it enters viewport for smoother UX
+        root: null,
+        rootMargin: "200px",
+        threshold: 0.01,
+      }
+    );
+
+    observer.observe(el);
+
     return () => {
-      // no cleanup necessary for Image object
+      try {
+        observer.disconnect();
+      } catch {}
     };
   }, [full]);
 
@@ -44,6 +88,7 @@ export default function Hero(): JSX.Element {
   return (
     <section
       id="hero"
+      ref={heroRef}
       className="relative h-screen flex items-center justify-center overflow-hidden"
       style={{
         backgroundImage: `url("${bgImage}")`,
@@ -53,10 +98,8 @@ export default function Hero(): JSX.Element {
       }}
       aria-label="Hero section"
     >
-      {/* subtle overlay */}
       <div className="absolute inset-0 bg-black/40" />
 
-      {/* Content */}
       <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
         <h1 className="text-5xl md:text-7xl font-bold mb-6">
           Welcome to
@@ -75,6 +118,7 @@ export default function Hero(): JSX.Element {
           >
             Learn Our Story
           </button>
+
           <button
             onClick={() =>
               document
@@ -88,7 +132,6 @@ export default function Hero(): JSX.Element {
         </div>
       </div>
 
-      {/* Scroll indicator */}
       <button
         onClick={scrollToAbout}
         className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce cursor-pointer"
@@ -97,7 +140,6 @@ export default function Hero(): JSX.Element {
         <ChevronDown size={32} />
       </button>
 
-      {/* Optional: subtle blur while high-res not loaded */}
       {!bgLoaded && (
         <div
           className="absolute inset-0 backdrop-blur-sm pointer-events-none"

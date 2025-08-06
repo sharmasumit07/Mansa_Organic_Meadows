@@ -1,4 +1,3 @@
-// components/Showcase.tsx
 "use client";
 
 import Image from "next/image";
@@ -6,33 +5,30 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type MediaItem = {
-  image: string; // full-size image OR mp4 CDN URL
-  type: "image" | "video";
-  thumbnail?: string; // small preview (thumb or poster)
-  poster?: string; // video poster (image)
-  webm?: string; // optional webm (we did not generate by default)
+  image: string; // image url
+  type: "image" | "video"; // we keep it for compatibility, but items are images only
+  thumbnail?: string;
   title?: string;
 };
 
+const CLOUDINARY_TRANSFORM = (url: string, w = 400) => {
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("res.cloudinary.com")) {
+      const parts = u.pathname.split("/upload/");
+      if (parts.length === 2) {
+        return `${u.origin}${parts[0]}/upload/f_auto,q_auto,w_${w}/${parts[1]}`;
+      }
+    }
+  } catch {
+    // noop
+  }
+  return url;
+};
+
 export default function Showcase(): JSX.Element {
-  // --- items derived from your cloudinary-urls.json ---
+  // <-- ONLY IMAGE ITEMS HERE (commented out / removed any video entries) -->
   const items: MediaItem[] = [
-    {
-      image:
-        "https://res.cloudinary.com/dlstdyi8d/video/upload/v1754484780/20241108_131510.mp4",
-      type: "video",
-      poster:
-        "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754484780/20241108_131510.jpg",
-      title: "Video 20241108_131510",
-    },
-    {
-      image:
-        "https://res.cloudinary.com/dlstdyi8d/video/upload/v1754485619/mansa_photos/20250227_115112.mp4",
-      type: "video",
-      poster:
-        "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754485619/mansa_photos/20250227_115112.jpg",
-      title: "Video 20250227_115112",
-    },
     {
       image:
         "https://res.cloudinary.com/dlstdyi8d/image/upload/v1754484875/20250115_102753.jpg",
@@ -84,11 +80,10 @@ export default function Showcase(): JSX.Element {
   ];
 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const currentItem = items[currentIndex];
 
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const goToPrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev === 0 ? items.length - 1 : prev - 1));
@@ -98,53 +93,31 @@ export default function Showcase(): JSX.Element {
     setCurrentIndex((prev) => (prev === items.length - 1 ? 0 : prev + 1));
   }, [items.length]);
 
-  const clearAutoAdvance = useCallback(() => {
+  // Auto-advance images only
+  useEffect(() => {
+    // Clear any previous timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
-  }, []);
 
-  // when slide changes, set loading true so UI shows spinner until media ready
-  useEffect(() => {
+    // Show loading until image finishes loading (onLoadingComplete will clear)
     setIsLoading(true);
-    if (videoRef.current) {
-      try {
-        videoRef.current.pause();
-        videoRef.current.currentTime = 0;
-        videoRef.current.load();
-      } catch {
-        // ignore
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndex]);
 
-  // Auto-advance images only
-  useEffect(() => {
-    clearAutoAdvance();
-    if (currentItem.type === "image") {
-      timeoutRef.current = setTimeout(() => {
-        goToNext();
-      }, 5000);
-    }
-    return clearAutoAdvance;
-  }, [currentIndex, currentItem.type, goToNext, clearAutoAdvance]);
+    // Auto advance after 5s
+    timeoutRef.current = setTimeout(() => {
+      goToNext();
+    }, 5000);
 
-  const handleVideoEnded = useCallback(() => {
-    goToNext();
-  }, [goToNext]);
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [currentIndex, goToNext]);
 
-  const handleVideoLoadStart = useCallback(() => setIsLoading(true), []);
-  const handleVideoCanPlay = useCallback(() => setIsLoading(false), []);
-
-  const handleThumbnailClick = useCallback(
-    (idx: number) => {
-      clearAutoAdvance();
-      setCurrentIndex(idx);
-    },
-    [clearAutoAdvance]
-  );
+  // small helper to get a transformed thumbnail for strip
+  const getThumb = (item: MediaItem) => {
+    return CLOUDINARY_TRANSFORM(item.thumbnail ?? item.image, 480);
+  };
 
   return (
     <section
@@ -162,67 +135,55 @@ export default function Showcase(): JSX.Element {
           </div>
         )}
 
-        {currentItem.type === "video" ? (
-          <video
-            ref={videoRef}
-            key={`${currentItem.image}-${currentIndex}`}
-            className="w-full h-full object-contain"
-            controls
-            preload="metadata"
-            playsInline
-            poster={currentItem.poster ?? currentItem.thumbnail}
-            onEnded={handleVideoEnded}
-            onLoadStart={handleVideoLoadStart}
-            onCanPlay={handleVideoCanPlay}
+        {/* IMAGE SLIDE */}
+        <div className="relative w-full h-full">
+          <Image
+            src={currentItem.image}
+            alt={currentItem.title ?? `Slide ${currentIndex + 1}`}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
+            style={{ objectFit: "contain" }}
+            priority={currentIndex === 0}
+            onLoadingComplete={() => setIsLoading(false)}
             onError={() => setIsLoading(false)}
-          >
-            <source src={currentItem.image} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        ) : (
-          <div className="relative w-full h-full">
-            <Image
-              src={currentItem.image}
-              alt={currentItem.title ?? `Slide ${currentIndex + 1}`}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
-              style={{ objectFit: "contain" }}
-              priority={currentIndex === 0}
-              onLoadingComplete={() => setIsLoading(false)}
-              onError={() => setIsLoading(false)}
-            />
-          </div>
-        )}
+          />
+        </div>
 
+        {/* Arrows */}
         <button
           onClick={() => {
-            clearAutoAdvance();
+            if (timeoutRef.current) {
+              clearTimeout(timeoutRef.current);
+              timeoutRef.current = null;
+            }
             goToPrevious();
           }}
-          aria-label="Previous"
+          aria-label="Previous highlight"
           className="absolute top-1/2 left-3 -translate-y-1/2 z-30 bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
-          disabled={isLoading}
         >
           <ChevronLeft size={24} />
         </button>
 
         <button
           onClick={() => {
-            clearAutoAdvance();
+            if (timeoutRef.current) {
+              clearTimeout(timeoutRef.current);
+              timeoutRef.current = null;
+            }
             goToNext();
           }}
-          aria-label="Next"
+          aria-label="Next highlight"
           className="absolute top-1/2 right-3 -translate-y-1/2 z-30 bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
-          disabled={isLoading}
         >
           <ChevronRight size={24} />
         </button>
 
+        {/* Dots */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex gap-2">
           {items.map((_, i) => (
             <button
               key={i}
-              onClick={() => handleThumbnailClick(i)}
+              onClick={() => setCurrentIndex(i)}
               className={`w-2 h-2 rounded-full transition-all duration-200 ${
                 i === currentIndex
                   ? "bg-white scale-125"
@@ -234,11 +195,12 @@ export default function Showcase(): JSX.Element {
         </div>
       </div>
 
+      {/* Thumbnails strip */}
       <div className="mt-6 flex gap-3 overflow-x-auto px-2">
         {items.map((item, idx) => (
           <button
             key={idx}
-            onClick={() => handleThumbnailClick(idx)}
+            onClick={() => setCurrentIndex(idx)}
             className={`relative rounded-md overflow-hidden flex-shrink-0 transition-all duration-200 ${
               idx === currentIndex
                 ? "ring-2 ring-green-500 scale-105"
@@ -248,22 +210,14 @@ export default function Showcase(): JSX.Element {
             aria-label={`Go to slide ${idx + 1}`}
           >
             <Image
-              src={item.poster ?? item.thumbnail ?? item.image}
+              src={getThumb(item)}
               alt={`Thumbnail ${idx + 1}`}
               fill
               sizes="120px"
               style={{ objectFit: "cover" }}
               priority={idx <= 2}
+              loading={idx <= 2 ? "eager" : "lazy"}
             />
-            {item.type === "video" && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="bg-white/90 rounded-full p-1 shadow-sm">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M8 5v14l11-7-11-7z" fill="#111827" />
-                  </svg>
-                </div>
-              </div>
-            )}
           </button>
         ))}
       </div>
